@@ -1,3 +1,9 @@
+## 0.1.2 (2026-09-29)
+
+### Fix
+
+- read explorer links on tvOS 15, which lacks URL.host(percentEncoded:)
+
 ## 0.1.1 (2026-09-29)
 
 ### Fix
