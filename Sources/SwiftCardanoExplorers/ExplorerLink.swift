@@ -15,19 +15,30 @@ import SwiftCardanoCore
 /// to an item: an asset by fingerprint, or an account by its stake key hash,
 /// which does not say whether it is a key or a script. Those give nil.
 public struct ExplorerLink: Sendable {
+    /// The explorer the link is to.
     public let explorer: BlockchainExplorer
+    /// The network of the explorer's site the link is to.
     public let network: Network
+    /// What the page shows.
     public let item: ExplorerItem
 
+    /// Reads a link to an explorer page.
+    /// - Parameter url: A link, such as one pasted by a person.
+    /// - Returns: nil when the link is not to one of the explorers' pages, or its
+    ///   identifier cannot be read back.
     public init?(_ url: URL) {
-        guard let host = url.host()?.lowercased() else { return nil }
+        // URLComponents rather than URL's newer accessors, which tvOS 15 lacks.
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            let host = components.host?.lowercased()
+        else { return nil }
         let site = BlockchainExplorer.allCases.lazy.flatMap { explorer in
             explorer.networks.map { (explorer, $0) }
         }.first { explorer, network in
-            explorer.explorer(network: network).networkUrls.url(for: network)?.host()?.lowercased() == host
+            explorer.explorer(network: network).networkUrls.url(for: network)
+                .flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false)?.host?.lowercased() } == host
         }
         guard let (explorer, network) = site else { return nil }
-        let segments = url.path(percentEncoded: false).split(separator: "/").map(String.init)
+        let segments = components.path.split(separator: "/").map(String.init)
         guard let id = segments.last,
             let item = Self.item(route: segments.dropLast().joined(separator: "/"), id: id, explorer: explorer, network: network)
         else { return nil }
