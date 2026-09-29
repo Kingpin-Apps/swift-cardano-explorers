@@ -10,6 +10,7 @@ public enum ExplorerError: Error, Equatable, Sendable, CustomStringConvertible {
     /// address without a stake part for an account page.
     case invalidItem(String)
 
+    /// The reason, in a sentence.
     public var description: String {
         switch self {
         case .unsupportedNetwork(let explorer, let network): "\(explorer) has no \(network) explorer."

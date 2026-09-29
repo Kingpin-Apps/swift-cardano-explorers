@@ -12,17 +12,27 @@ import SwiftCardanoCore
 /// if let url = explorer.link(for: .transaction(id), on: .preprod) { open(url) }
 /// ```
 public enum BlockchainExplorer: String, Codable, CaseIterable, Identifiable, CustomStringConvertible, Sendable {
+    /// [AdaStat](https://adastat.net): see ``AdaStat``.
     case adaStat = "adastat"
+    /// [Cardanoscan](https://cardanoscan.io): see ``CardanoScan``.
     case cardanoScan = "cardanoscan"
+    /// [Cexplorer](https://cexplorer.io): see ``Cexplorer``.
     case cexplorer = "cexplorer"
+    /// [DRepTalk](https://dreptalk.com): see ``DRepTalk``.
     case drepTalk = "dreptalk"
+    /// [eUTxO](https://eutxo.org): see ``Eutxo``.
     case eutxo = "eutxo"
+    /// [Pool PM](https://pool.pm): see ``PoolPM``.
     case poolPM = "poolpm"
+    /// [PoolTool](https://pooltool.io): see ``PoolTool``.
     case poolTool = "pooltool"
 
+    /// The raw value, which is stable across versions and safe to store.
     public var id: String { rawValue }
 
     /// The explorer on `network`.
+    /// - Parameter network: The network the links are for.
+    /// - Returns: The explorer's type, such as ``Cexplorer``, for that network.
     public func explorer(network: Network) -> any BlockchainExplorable {
         switch self {
         case .adaStat: AdaStat(network: network)
@@ -60,30 +70,57 @@ public enum BlockchainExplorer: String, Codable, CaseIterable, Identifiable, Cus
         }
     }
 
+    /// The explorer's ``name``.
     public var description: String { name }
 
     /// Whether the explorer covers `network`.
+    /// - Parameter network: A network.
+    /// - Returns: Whether the explorer has a site for it.
     public func supports(_ network: Network) -> Bool {
         explorer(network: network).supportsNetwork
     }
 
     /// Whether the explorer has a page for `kind` on `network`.
+    /// - Parameters:
+    ///   - kind: A kind of item.
+    ///   - network: A network.
+    /// - Returns: Whether the explorer has a site on `network` and pages for `kind`.
     public func supports(_ kind: ExplorerItem.Kind, on network: Network) -> Bool {
         explorer(network: network).supports(kind)
     }
 
     /// The explorer's page for `item` on `network`.
-    /// - Throws: ``ExplorerError`` when there is none.
+    /// - Parameters:
+    ///   - item: What to show.
+    ///   - network: The network the item is on.
+    /// - Returns: The page for it.
+    /// - Throws: ``ExplorerError`` when there is none, saying why.
     public func url(for item: ExplorerItem, on network: Network) throws -> URL {
         try explorer(network: network).url(for: item)
     }
 
     /// The explorer's page for `item` on `network`, or nil when there is none.
+    /// - Parameters:
+    ///   - item: What to show.
+    ///   - network: The network the item is on.
+    /// - Returns: The page for it, or nil.
     public func link(for item: ExplorerItem, on network: Network) -> URL? {
         explorer(network: network).link(for: item)
     }
 
-    /// The explorers with a page for `kind` on `network`.
+    /// The explorers with a page for `kind` on `network`, in the order of `allCases`.
+    ///
+    /// Use it to offer another explorer when the chosen one has no page:
+    ///
+    /// ```swift
+    /// let explorers = BlockchainExplorer.supporting(.transaction, on: .preview)
+    /// // [.cardanoScan, .cexplorer]
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - kind: A kind of item.
+    ///   - network: A network.
+    /// - Returns: The explorers that can show it.
     public static func supporting(_ kind: ExplorerItem.Kind, on network: Network) -> [BlockchainExplorer] {
         allCases.filter { $0.supports(kind, on: network) }
     }
