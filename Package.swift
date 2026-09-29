@@ -16,7 +16,7 @@ let package = Package(
         .library(name: "SwiftCardanoExplorers", targets: ["SwiftCardanoExplorers"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Kingpin-Apps/swift-cardano-core.git", from: "0.8.3"),
+        .package(url: "https://github.com/Kingpin-Apps/swift-cardano-core.git", from: "0.5.0"),
         .package(url: "https://github.com/Kingpin-Apps/swift-nacl.git", .upToNextMinor(from: "1.0.2")),
     ],
     targets: [
